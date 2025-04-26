@@ -32,7 +32,7 @@ out/
 coverage/
 *.lcov
 
-# Logs
+# Logs/history
 logs/
 *.log
 npm-debug.log*

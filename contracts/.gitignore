@@ -16,7 +16,7 @@ typechain-types/
 coverage/
 coverage.json
 
-# IDE
+# IDEDI
 .idea/
 .vscode/
 *.swp

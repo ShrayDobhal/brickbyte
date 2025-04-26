@@ -47,7 +47,7 @@ BRICKBYTE is a decentralized platform that enables fractional ownership of real 
 ## 🛠 Tech Stack
 
 ### Frontend
-- Next.js 14 (App Router)
+- Next.js 14 
 - TypeScript
 - TailwindCSS
 - Shadcn/ui

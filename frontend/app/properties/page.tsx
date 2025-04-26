@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PropertySkeleton } from '@/components/property-skeleton';
 import { CreatePropertyModal } from '@/components/create-property-modal';
-import { useProperties } from '@/hooks/use-properties';
 import Cookies from 'js-cookie';
 
 interface Property {
@@ -30,19 +29,22 @@ interface Property {
 
 interface Valuation {
   predicted_value: number;
-  predicted_roi: number;
-  market_trend: string;
   confidence_score: number;
-  location_score: number;
-  market_demand: string;
-  growth_potential: string;
-  last_updated: string;
+  predicted_roi: number;
+  market_trend: 'rising' | 'stable' | 'cooling';
+  analysis: {
+    location_score: number;
+    market_demand: number;
+    growth_potential: number;
+  };
 }
 
 export default function PropertiesPage() {
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [propertyValuations, setPropertyValuations] = useState<Record<string, Valuation>>({});
-  const { data: properties, isLoading, error, mutate } = useProperties();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const determineLocationGrade = (pricePerShare: number) => {
     if (pricePerShare >= 1.0) return 'prime';
@@ -62,7 +64,7 @@ export default function PropertiesPage() {
       
       console.log('Sending valuation request for property:', property.id, propertyData);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_ML_API_URL}/api/valuation`, {
+      const response = await fetch('http://localhost:8000/api/valuation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,24 +85,44 @@ export default function PropertiesPage() {
     }
   };
 
-  useEffect(() => {
-    const fetchValuations = async () => {
-      if (properties) {
-        const valuations: Record<string, Valuation> = {};
-        for (const property of properties) {
-          const valuation = await fetchPropertyValuation(property);
-          if (valuation) {
-            valuations[property.id] = valuation;
-          }
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('token')}`
         }
-        setPropertyValuations(valuations);
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch properties');
       }
-    };
+      
+      const data = await response.json();
+      setProperties(data);
+      
+      // Fetch valuations for all properties
+      const valuations: Record<string, Valuation> = {};
+      for (const property of data) {
+        const valuation = await fetchPropertyValuation(property);
+        if (valuation) {
+          valuations[property.id] = valuation;
+        }
+      }
+      setPropertyValuations(valuations);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+      setError('Failed to load properties. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchValuations();
-  }, [properties]);
+  useEffect(() => {
+    fetchProperties();
+  }, []);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto py-8">
         <h1 className="text-3xl font-bold mb-8">Available Properties</h1>
@@ -124,7 +146,7 @@ export default function PropertiesPage() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">Failed to load properties. Please try again.</p>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
         </div>
@@ -136,9 +158,7 @@ export default function PropertiesPage() {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Properties</h1>
-        <div className="flex justify-end">
-          <CreatePropertyModal onPropertyCreated={mutate} />
-        </div>
+        <CreatePropertyModal />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {properties?.map((property) => (

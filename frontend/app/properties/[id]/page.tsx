@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, TrendingUp, ExternalLink } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { ethers } from 'ethers';
 import RealEstateToken from '@/contracts/RealEstateToken.json';
@@ -262,6 +262,7 @@ export default function PropertyDetails() {
 
   return (
     <div className="container mx-auto py-8">
+      <Toaster />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Property Image */}
         <div className="relative h-[500px] rounded-lg overflow-hidden">
@@ -385,7 +386,6 @@ export default function PropertyDetails() {
           </Card>
         </div>
       </div>
-      <Toaster />
     </div>
   );
 } 

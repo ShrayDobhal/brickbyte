@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Linkedin, Github, Send } from "lucide-react"
@@ -12,14 +11,18 @@ export default function Footer() {
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <span>
-                <Image
-                  src="/assets/logo1.png" 
-                  alt="BrickByte Logo" 
-                  width={140} 
-                  height={40}
-                  priority
-                  className="invert dark:invert-0 transition-all duration-300"
-                />
+              <img
+                    src="/assets/logo1.png" 
+                    alt="BrickByte Logo" 
+                    width={140} 
+                    height={40} 
+                    style={{
+                      width: 140,
+                      height: 40,
+                    }}
+                    priority
+                    className="invert dark:invert-100 transition-all duration-300"
+                  />
               </span>
             </Link>
             <p className="text-muted-foreground mb-4">
